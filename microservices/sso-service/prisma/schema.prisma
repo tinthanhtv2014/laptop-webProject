@@ -1,0 +1,76 @@
+// Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL") // Cấu hình URL kết nối cơ sở dữ liệu từ .env
+}
+
+model providerLogin {
+  id               Int    @id @default(autoincrement())
+  userId           Int    @default(0)
+  providerIdString String @default("")
+  providerIdInt    String @default("")
+  methodProvider   String @default("")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  emailAddress  String    @unique // emailAddress phải là duy nhất
+  firstName     String    @default("")
+  lastName      String    @default("")
+  fullName      String    @default("")
+  phoneNumber   String?
+  address       String?
+  CodeAddress   Int       @default(0)
+  points        Int       @default(0)
+  status        String    @default("active") // hoặc giá trị mặc định khác
+  createDate    DateTime  @default(now())
+  updateDate    DateTime? @updatedAt
+  isDeleted     Boolean   @default(false)
+  passwordHash  String    @default("")
+  listTenant    String    @default("")
+  userUpdate    Int?      @default(0)
+  userCreate    Int?      @default(0)
+  role          Int       @default(0)
+  privateKey    String    @default("")
+  defaultTenant Int       @default(0)
+  orders        Order[] // One-to-many relation to the Post model
+}
+
+model Role {
+  id                     Int       @id @default(autoincrement())
+  organization           String    @default("")
+  roleName               String    @default("")
+  roleOder               Int       @default(0)
+  createDate             DateTime  @default(now())
+  updateDate             DateTime? @updatedAt
+  isDeleted              Boolean   @default(false)
+  listPermision          String    @db.LongText
+  parentId               Int       @default(0)
+  titleOrganization      String    @default("")
+  isEmployed             Int       @default(0)
+}
+
+model Order {
+  id                      Int       @id @default(autoincrement())
+  userId                  Int?      @default(0)
+  quantity                Int       @default(0)
+  orderStatus             String    @default("")
+  paymentStatus           Boolean   @default(false)
+  paymentMethod           String    @default("")
+  promotion               String    @db.LongText
+  listProducts            String    @db.LongText
+  user_info               String    @db.LongText
+  totalOrderPrice         Float     @default(0)
+  discountedVoucherAmount Float     @default(0)
+  priceAfterVoucher       Float     @default(0)
+  orderId                 String    @default("")
+  createDate              DateTime  @default(now())
+  updateDate              DateTime? @updatedAt
+  isDeleted               Boolean   @default(false)
+  user                    User?     @relation(fields: [userId], references: [id], onDelete: Cascade) // Cascade delete
+}

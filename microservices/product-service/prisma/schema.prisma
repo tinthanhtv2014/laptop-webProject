@@ -1,0 +1,126 @@
+// Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL") // Cấu hình URL kết nối cơ sở dữ liệu từ .env
+}
+
+model Category {
+  id                 Int       @id @default(autoincrement())
+  name               String    @default("")
+  slug               String    @default("")
+  description        String    @default("")
+  createDate         DateTime  @default(now())
+  updateDate         DateTime? @updatedAt
+  isDeleted          Boolean   @default(false)
+  parentId           Int       @default(0)
+  products           Product[] // Cascade delete for related products
+  product_details    Product_details[]
+  index              Int       @default(0)
+  order              Int       @default(0)
+  createUser         Int       @default(0)
+}
+
+model Product {
+  id               Int       @id @default(autoincrement())
+  name             String    @default("")
+  slug             String    @default("")
+  description      String    @default("") @db.VarChar(1000)  
+  image_url        String    @default("")
+  gallery_product  String    @db.LongText
+  price            Float     @default(0)
+  product_extend   String    @default("") @db.VarChar(1000)
+  unit             String    @default("")
+  availability     Boolean   @default(false)
+  rating           Float     @default(0)
+  review_count     Int       @default(0)
+  createDate       DateTime  @default(now())
+  updateDate       DateTime? @updatedAt
+  isDeleted        Boolean   @default(false)
+  status           String    @default("")
+  categoryId       Int
+  category         Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade) // Cascade delete
+  product_details  Product_details[]
+  wishlist         Wishlist[]
+}
+
+model Product_details  {
+  id                               Int            @id @default(autoincrement())
+  name_product_details             String         @default("")
+  price_product_details            Float          @default(0)
+  price_sale_product_details       Float          @default(0)
+  sale_product_details             Float          @default(0)
+  rating_product_details           Float          @default(0)
+  isShow                           Int            @default(0)
+  product_extend                   String         @default("") @db.VarChar(1000)  
+  amount_available                 Int            @default(0)
+  createDate                       DateTime       @default(now())
+  updateDate                       DateTime?      @updatedAt
+  isDeleted                        Boolean        @default(false)
+  productId                        Int
+  product                          Product?       @relation(fields: [productId], references: [id], onDelete: Cascade) // Cascade delete
+  // promotion                     Promotion[]
+  productSpotlights                ProductSpotlight[]
+  cart                             Cart[]
+  categoryId                       Int
+  category                         Category?       @relation(fields: [categoryId], references: [id], onDelete: Cascade) // Cascade delete
+}
+
+model Promotion  {
+  id                        Int       @id @default(autoincrement())
+  discountRate              Float     @default(0)
+  description               String    @default("")
+  startDate                 DateTime? @updatedAt
+  endDate                   DateTime? @updatedAt
+  image_promotion           String    @default("")
+  userUpdate                String    @default("")
+  createDate                DateTime  @default(now())
+  updateDate                DateTime? @updatedAt
+  isDeleted                 Boolean   @default(false)
+  codeData                  String    @default("")
+  totalQuantity             Int       @default(0)
+  usedQuantity              Int       @default(0)
+  productdetailList         String    @default("") @db.VarChar(1000) 
+  // productdetail          Product_details?  @relation(fields: [productdetailId], references: [id], onDelete: Cascade) // Cascade delete
+}
+
+model Spotlight_title{
+  id                  Int       @id @default(autoincrement())
+  name                String    @default("")
+  createDate          DateTime  @default(now())
+  updateDate          DateTime? @updatedAt
+  isDeleted           Boolean   @default(false)
+  productSpotlights   ProductSpotlight[]
+}
+
+model ProductSpotlight {
+  product_details_id  Int
+  spotlight_title_id  Int
+  product_details     Product_details @relation(fields: [product_details_id], references: [id], onDelete: Cascade)  // Cascade delete
+  spotlight_title     Spotlight_title @relation(fields: [spotlight_title_id], references: [id])
+
+  @@id([product_details_id, spotlight_title_id])  // Composite primary key
+}
+
+
+model Wishlist  {
+  id            Int       @id @default(autoincrement())
+  user_id       Int       @default(0)
+  product_id    Int       
+  product       Product?  @relation(fields: [product_id], references: [id], onDelete: Cascade) // Cascade delete
+}
+
+model Cart  {
+  id                            Int               @id @default(autoincrement())
+  userId                        Int               @default(0)
+  quantity                      Int               @default(0)
+  createDate                    DateTime          @default(now())
+  updateDate                    DateTime?         @updatedAt
+  isDeleted                     Boolean           @default(false)
+  product_details_id            Int               @default(0)
+  productdetail                 Product_details?  @relation(fields: [product_details_id], references: [id], onDelete: Cascade) // Cascade delete
+}

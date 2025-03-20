@@ -1,0 +1,115 @@
+// Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL") // Cấu hình URL kết nối cơ sở dữ liệu từ .env
+}
+
+model Blog {
+  id                  Int               @id @default(autoincrement())  // ID duy nhất
+  name                String            @default("")                  // Tên bài viết
+  slug                String            @unique                       // Đường dẫn thân thiện SEO
+  description         String            @default("") @db.VarChar(500)                 // Mô tả ngắn
+  short_description   String            @default("") @db.VarChar(500)                   // Mô tả ngắn gọn
+  image_url           String            @default("")                  // URL hình ảnh
+  content             String            @db.LongText                  // Nội dung bài viết
+  view_count          Int               @default(0)                   // Số lượt xem
+  categoryId          Int                                             // ID danh mục bài viết
+  category            Blog_Category     @relation(fields: [categoryId], references: [id]) 
+  sourceRelations     Blog_Relation[]   @relation("BlogAsSource")     // Các quan hệ là nguồn
+  targetRelations     Blog_Relation[]   @relation("BlogAsTarget")     // Các quan hệ là đích
+
+  // Thuộc tính chung
+  userUpdate          String            @default("")                  // Người cập nhật
+  createDate          DateTime          @default(now())               // Ngày tạo
+  updateDate          DateTime?         @updatedAt                    // Ngày cập nhật
+  isDeleted           Boolean           @default(false)               // Trạng thái xóa
+  isShow              Boolean           @default(false)
+  status              String            @default("")                  // Mô tả SEO
+}
+
+
+model Blog_Category {
+  id                  Int               @id @default(autoincrement()) // ID danh mục
+  name                String            @unique                       // Tên danh mục
+  slug                String            @unique                       // Đường dẫn thân thiện SEO
+  description         String            @default("") @db.VarChar(500)
+  blogs               Blog[]                                        // Các bài viết thuộc danh mục
+
+  // Thuộc tính chung
+  userUpdate          String            @default("")                  // Người cập nhật
+  createDate          DateTime          @default(now())               // Ngày tạo
+  updateDate          DateTime?         @updatedAt                    // Ngày cập nhật
+  isDeleted           Boolean           @default(false)               // Trạng thái xóa
+}
+
+
+model Blog_Relation {
+  id                  Int       @id @default(autoincrement())   // ID duy nhất
+  blogId              Int                                        // ID của blog nguồn
+  relatedBlogId       Int                                        // ID của blog đích
+  blog                Blog      @relation("BlogAsSource", fields: [blogId], references: [id]) 
+  relatedBlog         Blog      @relation("BlogAsTarget", fields: [relatedBlogId], references: [id]) 
+}
+
+
+model Comment  {
+  CommentID               Int                    @id @default(autoincrement())
+  Content_comment         String                 @default("")
+  Status_comment          String                 @default("")
+  rating                  Int                    @default(0)
+  tenant_id               Int                 
+  product_detailsId       Int                
+  userId                  Int
+  isShow                  Boolean                @default(false)
+ createDate          DateTime          @default(now())               // Ngày tạo
+  updateDate          DateTime?         @updatedAt                    // Ngày cập nhật
+  isDeleted               Boolean                @default(false)
+}
+
+model Feedback {
+  id                      Int        @id @default(autoincrement())
+  codeName                String     @default("") 
+  content                 String     @default("")
+  status                  String     @default("")
+  rating                  Int        @default(0)
+  userId                  Int?       @default(0)
+  keyType                 String?    @default("")    //để phân biệt được đang lưu id của bảng nào       
+  keyReferenceString      String?    @default("")
+  keyReferenceInt         Int?       @default(0)
+  userInfor               String     @default("") @db.VarChar(2000)
+  userUpdate              String     @default("")                  // Người cập nhật
+  createDate              DateTime   @default(now())               // Ngày tạo
+  updateDate              DateTime?  @updatedAt                    // Ngày cập nhật
+  isDeleted               Boolean    @default(false)               // Trạng thái xóa
+  value1                  String?    @db.LongText
+  value2                  String?    @db.LongText
+  value3                  String?    @db.LongText
+  number1                 Float?     @default(0)
+  number2                 Float?     @default(0)
+  number3                 Float?     @default(0)
+  bool1                   Boolean?   @default(false)
+  bool2                   Boolean?   @default(false)
+  bool3                   Boolean?   @default(false)
+  userIdAnwser            Int?       @default(0)
+  answer                  String?    @db.LongText
+
+}
+
+model Banner  {
+  id                   Int          @id @default(autoincrement())
+  name                 String       @default("")
+  slug                 String       @default("")
+  imgurl_banner        String       @db.LongText
+  description          String       @default("") @db.VarChar(500)
+  isShow               Int          @default(0)
+  displayorder_banner  Int          @default(0)
+  userUpdate           String       @default("") 
+  createDate           DateTime     @default(now())
+  updateDate           DateTime?    @updatedAt
+  isDeleted            Boolean      @default(false)
+}
